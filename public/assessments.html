@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economic Feasibility Assessment</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js" defer></script>
+</head>
+<body>
+    <header>
+        <div id="company-logo">
+            <img src="img/logo.jpg" alt="Company Logo" style="max-width: 150px;">
+        </div>
+        <h1 id="header-title">Economic Feasibility Assessment</h1>
+    </header>
+
+    <main>
+        <aside id="dashboard-section">
+            <h2>Dashboard</h2>
+            <div id="assessment-counts">
+                <p><strong>Assessments Requested:</strong> <span id="assessments-requested">0</span></p>
+                <p><strong>Assessments Completed:</strong> <span id="assessments-completed">0</span></p>
+            </div>
+            <div id="visualization-placeholder">
+                <h3>Visualizations</h3>
+                <p>This area will display visualizations later.</p>
+            </div>
+        </aside>
+
+        <section id="main-content">
+        
+        <section id="assessment-section">
+            <h2>Economic Feasibility Assessment</h2>
+            <form id="assessment-form" enctype="multipart/form-data">
+                <label for="organization-name">Name of Organization:</label>
+                <select id="organization-name" name="organization-name">
+                    <option value="">--Select Existing--</option>
+                    <option value="Org1">Org1</option>
+                    <option value="Org2">Org2</option>
+                </select>
+                <input type="text" id="new-organization" name="new-organization" placeholder="Or create new" style="display: block; margin-top: 10px;">
+
+                <label for="facility-type">Facility Type:</label>
+                <select id="facility-type" name="facility-type">
+                    <option value="library">Library</option>
+                    <option value="airport">Airport</option>
+                    <option value="city-hall">City Hall</option>
+                </select>
+
+                <label for="street-address">Street Address:</label>
+                <input type="text" id="street-address" name="street-address" required>
+
+                <label>Status of Facility:</label>
+                <div class="radio-group">
+                    <input type="radio" id="existing" name="status" value="existing" checked>
+                    <label for="existing">Existing</label>
+                    <input type="radio" id="new" name="status" value="new">
+                    <label for="new">New (Planned)</label>
+                </div>
+
+                <label for="internet-type">Internet Connection Type:</label>
+                <select id="internet-type" name="internet-type">
+                    <option value="dsl">DSL</option>
+                    <option value="fiber">Fiber</option>
+                    <option value="cable">Cable</option>
+                </select>
+
+                <label for="isp-name">ISP Name:</label>
+                <select id="isp-name" name="isp-name">
+                    <option value="verizon">Verizon</option>
+                    <option value="tmobile">T-Mobile</option>
+                    <option value="att">AT&T</option>
+                </select>
+
+                <label for="contract-expiration">Current Contract Expiration Date:</label>
+                <input type="date" id="contract-expiration" name="contract-expiration">
+
+                <label for="subscribed-speed">Subscribed Internet Speed (Upload/Download):</label>
+                <input type="text" id="subscribed-speed" name="subscribed-speed" placeholder="e.g., 100/20 Mbps">
+
+                <label for="internet_reliability">Internet Reliability:</label>
+                <select id="internet_reliability" name="internet_reliability">
+                    <option value="excellent">Excellent</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                </select>
+
+                <label for="document-upload">Upload Supporting Documents (if any):</label>
+                <input type="file" id="document-upload" name="document">
+
+                <button type="submit">Submit Assessment</button>
+            </form>
+        </section>
+    </section>
+</main>
+
+
+    <footer>
+        <p>&copy; 2025 SNG Digital Inclusion and Transformation Platform</p>
+    </footer>
+</body>
+</html>
