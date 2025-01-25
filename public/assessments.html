@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Economic Feasibility Assessment</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css"> 
     <script src="scripts.js" defer></script>
 </head>
 <body>
@@ -29,73 +29,125 @@
         </aside>
 
         <section id="main-content">
-        
-        <section id="assessment-section">
-            <h2>Economic Feasibility Assessment</h2>
-            <form id="assessment-form" enctype="multipart/form-data">
-                <label for="organization-name">Name of Organization:</label>
-                <select id="organization-name" name="organization-name">
-                    <option value="">--Select Existing--</option>
-                    <option value="Org1">Org1</option>
-                    <option value="Org2">Org2</option>
-                </select>
-                <input type="text" id="new-organization" name="new-organization" placeholder="Or create new" style="display: block; margin-top: 10px;">
+            <section id="assessment-section">
+                <h2>Economic Feasibility Assessment</h2>
+                <form id="assessment-form" enctype="multipart/form-data">
+                    <label for="project">Project:</label>
+                    <select id="project" name="project">
+                        <option value="">--Select Project--</option> 
+                    </select>
 
-                <label for="facility-type">Facility Type:</label>
-                <select id="facility-type" name="facility-type">
-                    <option value="library">Library</option>
-                    <option value="airport">Airport</option>
-                    <option value="city-hall">City Hall</option>
-                </select>
+                    <label for="organization-name">Name of Organization:</label>
+                    <select id="organization-name" name="organization-name">
+                        <option value="">--Select Existing--</option> 
+                    </select>
+                    <input type="text" id="new-organization" name="new-organization" placeholder="Or create new" style="display: block; margin-top: 10px;">
 
-                <label for="street-address">Street Address:</label>
-                <input type="text" id="street-address" name="street-address" required>
+                    <label for="facility-type">Facility Type:</label>
+                    <select id="facility-type" name="facility-type">
+                        <option value="">--Select Existing--</option> 
+                    </select>
 
-                <label>Status of Facility:</label>
-                <div class="radio-group">
-                    <input type="radio" id="existing" name="status" value="existing" checked>
-                    <label for="existing">Existing</label>
-                    <input type="radio" id="new" name="status" value="new">
-                    <label for="new">New (Planned)</label>
-                </div>
+                    <label for="street-address">Street Address:</label>
+                    <input type="text" id="street-address" name="street-address" required>
 
-                <label for="internet-type">Internet Connection Type:</label>
-                <select id="internet-type" name="internet-type">
-                    <option value="dsl">DSL</option>
-                    <option value="fiber">Fiber</option>
-                    <option value="cable">Cable</option>
-                </select>
+                    <label>Status of Facility:</label>
+                    <div class="radio-group">
+                        <input type="radio" id="existing" name="status" value="existing" checked>
+                        <label for="existing">Existing</label>
+                        <input type="radio" id="new" name="status" value="new">
+                        <label for="new">New (Planned)</label>
+                    </div>
 
-                <label for="isp-name">ISP Name:</label>
-                <select id="isp-name" name="isp-name">
-                    <option value="verizon">Verizon</option>
-                    <option value="tmobile">T-Mobile</option>
-                    <option value="att">AT&T</option>
-                </select>
+                    <label for="internet-type">Internet Connection Type:</label>
+                    <select id="internet-type" name="internet-type">
+                        <option value="dsl">DSL</option>
+                        <option value="fiber">Fiber</option>
+                        <option value="cable">Cable</option>
+                    </select>
 
-                <label for="contract-expiration">Current Contract Expiration Date:</label>
-                <input type="date" id="contract-expiration" name="contract-expiration">
+                    <label for="isp-name">ISP Name:</label>
+                    <select id="isp-name" name="isp-name">
+                        <option value="verizon">Verizon</option>
+                        <option value="tmobile">T-Mobile</option>
+                        <option value="att">AT&T</option>
+                    </select>
 
-                <label for="subscribed-speed">Subscribed Internet Speed (Upload/Download):</label>
-                <input type="text" id="subscribed-speed" name="subscribed-speed" placeholder="e.g., 100/20 Mbps">
+                    <label for="contract-expiration">Current Contract Expiration Date:</label>
+                    <input type="date" id="contract-expiration" name="contract-expiration">
 
-                <label for="internet_reliability">Internet Reliability:</label>
-                <select id="internet_reliability" name="internet_reliability">
-                    <option value="excellent">Excellent</option>
-                    <option value="good">Good</option>
-                    <option value="fair">Fair</option>
-                    <option value="poor">Poor</option>
-                </select>
+                    <label for="subscribed-speed">Subscribed Internet Speed (Upload/Download):</label>
+                    <input type="text" id="subscribed-speed" name="subscribed-speed" placeholder="e.g., 100/20 Mbps">
 
-                <label for="document-upload">Upload Supporting Documents (if any):</label>
-                <input type="file" id="document-upload" name="document">
+                    <label for="monthly_internet_cost">Monthly Internet Cost:</label>
+                    <input type="number" id="monthly_internet_cost" name="monthly_internet_cost" step="0.01" min="0" required>
 
-                <button type="submit">Submit Assessment</button>
-            </form>
+                    <label for="monthly_voice_cost">Monthly Voice Cost:</label>
+                    <input type="number" id="monthly_voice_cost" name="monthly_voice_cost" step="0.01" min="0">
+
+                    <label for="monthly_other_service_cost">Monthly Other Service Costs:</label>
+                    <input type="number" id="monthly_other_service_cost" name="monthly_other_service_cost" step="0.01" min="0">
+
+                    <h3>Assessment Questions:</h3>
+
+                    <label for="question1_speed">1. How would you rate the speed of your internet connection?</label>
+                    <select id="question1_speed" name="question1_speed">
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                    </select>
+
+                    <label for="question2_reliability">2. How reliable is your internet connection? (e.g., frequent outages, slowdowns)</label>
+                    <select id="question2_reliability" name="question2_reliability">
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                    </select>
+
+                    <label for="question3_support">3. How satisfied are you with your ISP's customer support?</label>
+                    <select id="question3_support" name="question3_support">
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                    </select>
+
+                    <label for="question4_cost">4. How do you rate the cost of your internet service?</label>
+                    <select id="question4_cost" name="question4_cost">
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                    </select>
+
+                    <label for="question5_sufficient">5. Is the current internet speed sufficient for your organization's needs?</label>
+                    <select id="question5_sufficient" name="question5_sufficient">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+
+                    <label for="question6_future_needs">6. Do you anticipate any changes in your internet needs in the next 1-2 years?</label>
+                    <select id="question6_future_needs" name="question6_future_needs">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+
+                    <label for="question7_limitations">7. Are there any limitations or challenges you face due to your current internet service?</label>
+                    <textarea id="question7_limitations" name="question7_limitations" rows="4" cols="50"></textarea>
+
+                    <label for="question8_improvements">8. What improvements would you like to see in your internet service?</label>
+                    <textarea id="question8_improvements" name="question8_improvements" rows="4" cols="50"></textarea>
+
+                    <label for="document-upload">Upload Supporting Documents (if any):</label>
+                    <input type="file" id="document-upload" name="document">
+
+                    <button type="submit">Submit Assessment</button>
+                </form>
+            </section>
         </section>
-    </section>
-</main>
-
+    </main>
 
     <footer>
         <p>&copy; 2025 SNG Digital Inclusion and Transformation Platform</p>

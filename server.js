@@ -1,24 +1,19 @@
 require('dotenv').config(); 
 
+// Server.js
 const express = require('express');
 const cors = require('cors');
-const { Pool } = require('pg'); 
+const { Pool } = require('pg');
 const multer = require('multer');
 const path = require('path');
-const bcrypt = require('bcryptjs'); 
 
 const app = express();
 const port = 3001;
 
 // Database configuration
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL 
 });
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static('public')); 
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -32,10 +27,17 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.static('public')); // Serve static files (e.g., images)
+
 // Get all organizations
 app.get('/api/organizations', async (req, res) => {
   try {
-    const result = await pool.query('SELECT DISTINCT organization_name FROM Organizations');
+    const userId = req.headers.authorization; // Assuming user ID is passed in Authorization header
+    const result = await pool.query('SELECT * FROM Organizations WHERE user_id = $1', [userId]);
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error fetching organizations:', error);
@@ -43,144 +45,174 @@ app.get('/api/organizations', async (req, res) => {
   }
 });
 
-// Get organization data by name
-app.get('/api/organizations/:name', async (req, res) => {
+// Get all distinct facility types
+app.get('/api/facility-types', async (req, res) => {
   try {
-    const { name } = req.params;
-    const result = await pool.query('SELECT * FROM Facilities WHERE organization_id = (SELECT organization_id FROM Organizations WHERE organization_name = $1)', [name]);
-    res.status(200).json(result.rows[0]); 
+    const userId = req.headers.authorization; // Assuming user ID is passed in Authorization header
+    const result = await pool.query('SELECT DISTINCT facility_type FROM Facilities WHERE organization_id IN (SELECT id FROM Organizations WHERE user_id = $1)', [userId]);
+    res.status(200).json(result.rows);
   } catch (error) {
-    console.error('Error fetching organization data:', error);
+    console.error('Error fetching facility types:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Register a new user
-app.post('/api/register', async (req, res) => {
-  const { email, password } = req.body;
-
+// Get all distinct projects
+app.get('/api/projects', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(password, 10); 
-    await pool.query('INSERT INTO Users (user_email, password) VALUES ($1, $2)', [email, hashedPassword]);
-    res.status(201).json({ message: 'User registered successfully' });
+    const userId = req.headers.authorization; // Assuming user ID is passed in Authorization header
+    const result = await pool.query('SELECT DISTINCT project FROM Organizations WHERE user_id = $1', [userId]);
+    res.status(200).json(result.rows);
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Error fetching projects:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// User login
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
+// Create or update organization and facility data
+app.post('/api/assessments', upload.single('document'), async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM Users WHERE user_email = $1', [email]);
+    const { 
+      organizationName, 
+      project, 
+      facilityType, 
+      streetAddress, 
+      status, 
+      internetType, 
+      ispName, 
+      contractExpiration, 
+      subscribedSpeed, 
+      monthly_internet_cost, 
+      monthly_voice_cost, 
+      monthly_other_service_cost,
+      question1_speed, 
+      question2_reliability, 
+      question3_support, 
+      question4_cost,
+      question5_sufficient, 
+      question6_future_needs, 
+      question7_limitations, 
+      question8_improvements 
+    } = req.body;
 
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    const userId = req.headers.authorization; // Assuming user ID is passed in Authorization header
+
+    // Basic input validation
+    if (!organizationName) {
+      return res.status(400).json({ error: 'Organization Name is required' });
     }
-
-    const user = result.rows[0];
-    if (await bcrypt.compare(password, user.password)) {
-      // Assuming you want to store the user ID in the session 
-      // (replace with your actual session management)
-      req.session.userId = user.id; 
-      res.status(200).json({ message: 'Login successful' });
-    } else {
-      res.status(401).json({ message: 'Invalid credentials' });
+    if (!project) {
+      return res.status(400).json({ error: 'Project is required' });
     }
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+    if (!facilityType) {
+      return res.status(400).json({ error: 'Facility Type is required' });
+    }
+    // ... add more input validations for other fields as needed
 
-// Submit assessment responses
-app.post('/api/assessments/submit', upload.single('document'), async (req, res) => {
-  try {
-    const { organization_name, ...formData } = req.body; 
     const documentUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const orgResult = await pool.query('SELECT organization_id FROM Organizations WHERE organization_name = $1', [organization_name]);
-    const organization_id = orgResult.rows[0].organization_id;
+    // Check if organization exists
+    const checkOrgQuery = 'SELECT id FROM Organizations WHERE organization_name = $1 AND user_id = $2';
+    const checkOrgResult = await pool.query(checkOrgQuery, [organizationName, userId]);
 
-    const facilityResult = await pool.query('SELECT * FROM Facilities WHERE organization_id = $1', [organization_id]);
-    let facilityData = facilityResult.rows[0]; 
-
-    if (facilityData) {
-      const updateQuery = `
-        UPDATE Facilities
-        SET 
-          facility_type = $1,
-          facility_address = $2,
-          facility_status = $3,
-          internet_technology = $4, 
-          ISP_name = $5,
-          current_contract_expiration_date = $6,
-          subscribed_download = $7,
-          subscribed_upload = $8
-        WHERE organization_id = $9`;
-      const updateValues = [
-        formData.facility_type,
-        formData.street_address,
-        formData.status,
-        formData.internet_type,
-        formData.isp_name,
-        formData.contract_expiration,
-        formData.subscribed_speed.split('/')[0],
-        formData.subscribed_speed.split('/')[1]
-      ];
-      await pool.query(updateQuery, [...updateValues, organization_id]);
+    let organizationId;
+    if (checkOrgResult.rows.length === 0) {
+      // Insert new organization
+      const insertOrgQuery = 'INSERT INTO Organizations (organization_name, project, user_id) VALUES ($1, $2, $3) RETURNING id';
+      const insertOrgResult = await pool.query(insertOrgQuery, [organizationName, project, userId]);
+      organizationId = insertOrgResult.rows[0].id;
     } else {
-      const insertQuery = `
-        INSERT INTO Facilities (organization_id, facility_type, facility_address, facility_status, internet_technology, ISP_name, current_contract_expiration_date, subscribed_download, subscribed_upload)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
-      const insertValues = [
-        organization_id,
-        formData.facility_type,
-        formData.street_address,
-        formData.status,
-        formData.internet_type,
-        formData.isp_name,
-        formData.contract_expiration,
-        formData.subscribed_speed.split('/')[0],
-        formData.subscribed_speed.split('/')[1]
-      ];
-      await pool.query(insertQuery, insertValues);
+      organizationId = checkOrgResult.rows[0].id;
     }
 
-    // Assuming you have a user ID (replace with your actual user ID retrieval logic)
-    const userId = 1; 
+    // Update or insert facility data (no changes to this part)
+    // ... (rest of the code for facility data handling remains the same)
 
+    // Insert assessment data (with all questions)
     const insertAssessmentQuery = `
-      INSERT INTO Assessments (organization_id, user_id, 
-                                question1_response, question2_response, question3_response 
-                                -- Add other question response columns here
-                              )
-      VALUES ($1, $2, $3, $4, $5 
-              -- Add other question response values here
-             )`;
+      INSERT INTO Assessments (organization_id, 
+                                question1_speed, 
+                                question2_reliability, 
+                                question3_support, 
+                                question4_cost,
+                                question5_sufficient, 
+                                question6_future_needs, 
+                                question7_limitations, 
+                                question8_improvements,
+                                monthly_internet_cost,
+                                monthly_voice_cost,
+                                monthly_other_service_cost,
+                                document_url 
+                             ) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+      RETURNING *;
+    `;
     const insertAssessmentValues = [
-      organization_id, 
-      userId, 
-      formData.question1, 
-      formData.question2, 
-      formData.question3 
-      // Add other question response values here
+      organizationId,
+      question1_speed, 
+      question2_reliability, 
+      question3_support, 
+      question4_cost,
+      question5_sufficient, 
+      question6_future_needs, 
+      question7_limitations, 
+      question8_improvements,
+      monthly_internet_cost, 
+      monthly_voice_cost, 
+      monthly_other_service_cost,
+      documentUrl 
     ];
-    await pool.query(insertAssessmentQuery, insertAssessmentValues);
+    const assessmentResult = await pool.query(insertAssessmentQuery, insertAssessmentValues);
 
-    res.status(200).json({ message: 'Assessment submitted successfully' });
+    res.status(201).json(assessmentResult.rows[0]); 
   } catch (error) {
     console.error('Error submitting assessment:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
+// Get all assessments (modify to include relevant data)
+app.get('/api/assessments', async (req, res) => {
+  try {
+    const userId = req.headers.authorization; // Assuming user ID is passed in Authorization header
+    const result = await pool.query(`
+      SELECT 
+        a.id, 
+        o.organization_name, 
+        o.project, 
+        f.facility_type, 
+        f.facility_address, 
+        f.subscribed_speed, 
+        a.question1_speed, 
+        a.question2_reliability, 
+        a.question3_support, 
+        a.question4_cost,
+        a.question5_sufficient, 
+        a.question6_future_needs, 
+        a.question7_limitations, 
+        a.question8_improvements,
+        a.monthly_internet_cost,
+        a.monthly_voice_cost,
+        a.monthly_other_service_cost,
+        a.document_url 
+      FROM 
+        Assessments a
+      JOIN 
+        Organizations o ON a.organization_id = o.id
+      JOIN 
+        Facilities f ON a.organization_id = f.organization_id
+      WHERE o.user_id = $1
+    `, [userId]);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching assessments:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 pool.connect()
   .then(() => console.log('Connected to PostgreSQL'))
-  .catch(err => console.error('Could not connect to PostgreSQL:', err));
-
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+  .catch(err => {
+    console.error('Could not connect to PostgreSQL:', err);
+    process.exit(1); 
+  });

@@ -1,140 +1,94 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const sections = {
-        login: document.getElementById("login-section"),
-        createAccount: document.getElementById("create-account-section"),
-        mainContent: document.getElementById("main-content"),
-        homeSection: document.getElementById("home-section") 
-    };
+// Fetch organizations from the server
+fetch('/api/organizations')
+  .then(response => response.json())
+  .then(data => {
+    const organizationSelect = document.getElementById('organization-name');
+    data.forEach(org => {
+      const option = document.createElement('option');
+      option.value = org.organization_name;
+      option.text = org.organization_name;
+      organizationSelect.appendChild(option);
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching organizations:', error);
+  });
 
-    const headerTitle = document.getElementById("header-title");
-    const loginForm = document.getElementById("login-form");
-    const createAccountBtn = document.getElementById("create-account-btn");
-    const backToLoginBtns = document.querySelectorAll("#back-to-login-btn");
-    const takeAssessmentBtn = document.getElementById("take-assessment-btn");
+// Fetch distinct facility types from the server
+fetch('/api/facility-types')
+  .then(response => response.json())
+  .then(data => {
+    const facilityTypeSelect = document.getElementById('facility-type');
+    data.forEach(type => {
+      const option = document.createElement('option');
+      option.value = type.facility_type;
+      option.text = type.facility_type;
+      facilityTypeSelect.appendChild(option);
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching facility types:', error);
+  });
 
-    const assessmentsRequested = document.getElementById('assessments-requested');
-    const assessmentsCompleted = document.getElementById('assessments-completed');
+// Fetch distinct projects from the server
+fetch('/api/projects')
+  .then(response => response.json())
+  .then(data => {
+    const projectSelect = document.getElementById('project');
+    data.forEach(project => {
+      const option = document.createElement('option');
+      option.value = project.project;
+      option.text = project.project;
+      projectSelect.appendChild(option);
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching projects:', error);
+  });
 
-    loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const email = document.getElementById("username").value;
-        const password = document.getElementById("login-password").value;
+// Handle form submission and validation
+const assessmentForm = document.getElementById('assessment-form');
 
-        try {
-            const response = await fetch('http://localhost:3001/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+assessmentForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
 
-            if (response.ok) {
-                sections.login.style.display = "none";
-                sections.mainContent.style.display = "flex"; 
+  // Basic input validation (add more as needed)
+  const organizationName = document.getElementById('organization-name').value;
+  const project = document.getElementById('project').value;
+  const facilityType = document.getElementById('facility-type').value;
+  if (!organizationName) {
+    alert('Organization Name is required.');
+    return;
+  }
+  if (!project) {
+    alert('Project is required.');
+    return;
+  }
+  if (!facilityType) {
+    alert('Facility Type is required.');
+    return;
+  }
+  // ... add more input validation checks for other fields
 
-                // Fetch and display assessment counts after login
-                fetch('/api/user/assessments') 
-                    .then(response => response.json())
-                    .then(data => {
-                        assessmentsRequested.textContent = data.requested;
-                        assessmentsCompleted.textContent = data.completed;
-                    })
-                    .catch(error => console.error('Error fetching assessment counts:', error));
-            } else {
-                alert('Invalid email or password.');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('An error occurred during login.');
-        }
+  const formData = new FormData(assessmentForm);
+
+  try {
+    const response = await fetch('/api/assessments', {
+      method: 'POST',
+      body: formData
     });
 
-    createAccountBtn.addEventListener("click", () => {
-        sections.login.style.display = "none";
-        sections.createAccount.style.display = "block";
-    });
-
-    backToLoginBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            sections.createAccount.style.display = "none";
-            sections.login.style.display = "block";
-        });
-    });
-
-    takeAssessmentBtn.addEventListener("click", () => { 
-        window.location.href = "assessments.html"; 
-    });
-
-    // Fetch assessment counts on assessments.html page
-    if (window.location.pathname === "/assessments.html") {
-        fetch('/api/user/assessments') 
-            .then(response => response.json())
-            .then(data => {
-                assessmentsRequested.textContent = data.requested;
-                assessmentsCompleted.textContent = data.completed;
-            })
-            .catch(error => console.error('Error fetching assessment counts:', error));
-
-        const organizationSelect = document.getElementById('organization-name');
-
-        fetch('/api/organizations')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(org => {
-                    const option = document.createElement('option');
-                    option.value = org.organization_name;
-                    option.text = org.organization_name;
-                    organizationSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error fetching organizations:', error));
-
-        organizationSelect.addEventListener('change', async () => { 
-            const selectedOrganization = organizationSelect.value;
-            if (selectedOrganization) {
-                try {
-                    const response = await fetch(`/api/organizations/${selectedOrganization}`);
-                    const data = await response.json();
-                    if (data) {
-                        document.getElementById('facility-type').value = data.facility_type || '';
-                        document.getElementById('street-address').value = data.facility_address || '';
-                        // ... (populate other fields with existing data) ...
-                    }
-                } catch (error) {
-                    console.error('Error fetching organization data:', error);
-                }
-            }
-        });
-
-        const assessmentForm = document.getElementById('assessment-form');
-
-        assessmentForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const formData = new FormData(assessmentForm);
-            const organizationName = formData.get('organization-name');
-
-            try {
-                const response = await fetch('/api/assessments/submit', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    alert('Assessment submitted successfully!');
-                    // Optionally, redirect the user to a confirmation page or refresh the counts
-                    fetch('/api/user/assessments') 
-                        .then(response => response.json())
-                        .then(data => {
-                            assessmentsRequested.textContent = data.requested;
-                            assessmentsCompleted.textContent = data.completed;
-                        });
-                } else {
-                    alert('Error submitting assessment.');
-                }
-            } catch (error) {
-                console.error('Error submitting assessment:', error);
-                alert('An error occurred while submitting the assessment.');
-            }
-        });
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Assessment submitted successfully:', data);
+      // Optionally, display a success message to the user
+    } else {
+      const errorData = await response.json();
+      console.error('Error submitting assessment:', errorData);
+      // Optionally, display an error message to the user
     }
+  } catch (error) {
+    console.error('Error submitting assessment:', error);
+    // Optionally, display an error message to the user
+  }
 });

@@ -28,7 +28,7 @@ main {
 aside#dashboard-section {
     width: 30%;
     background-color: #f0f0f0;
-    padding: 20px;
+    padding: 80px;
     margin-right: 20px;
 }
 
@@ -82,8 +82,11 @@ footer {
     width: 100%;
 }
 
+/* assessment styles */
+
 #assessment-section {
     margin-bottom: 100px;
+    align-items: center;
 }
 
 #assessment-questions {
