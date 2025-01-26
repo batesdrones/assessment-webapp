@@ -22,6 +22,17 @@ app.get('/api/organizations', async (req, res) => {
   }
 });
 
+app.get('/api/facility-types', async (req, res) => {
+  try {
+    const userId = req.headers.authorization; // Assuming user ID is passed in Authorization header
+    const result = await pool.query('SELECT DISTINCT facility_type FROM Facilities');
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching facility types:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 app.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT 1'); 

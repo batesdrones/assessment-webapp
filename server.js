@@ -216,3 +216,7 @@ pool.connect()
     console.error('Could not connect to PostgreSQL:', err);
     process.exit(1); 
   });
+
+  app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
