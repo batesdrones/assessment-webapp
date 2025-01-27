@@ -6,29 +6,40 @@ body {
     line-height: 1.6;
     background-color: #f4f4f4;
     color: #333;
+    display: flex;
+    flex-direction: column; 
+    min-height: 100vh; 
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+
 }
 
-#company-logo img {
-    display: block;
-    margin: 0 auto 20px;
+#company-logo {
+    margin-right: 20px; /* Create space between logo and header */
+    align-items: center;
 }
+
 
 header {
     background-color: #0073e6;
     color: white;
     padding: 20px 0;
-    text-align: center;
-    cursor: pointer;
+    display: flex;
+    justify-content: center;
 }
 
 main {
     display: flex;
+    flex-direction: column; 
+    min-height: 100vh; 
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
 }
 
 aside#dashboard-section {
     width: 30%;
     background-color: #f0f0f0;
-    padding: 80px;
+    padding: 20px;
     margin-right: 20px;
 }
 
@@ -87,6 +98,7 @@ footer {
 #assessment-section {
     margin-bottom: 100px;
     align-items: center;
+    margin-right: 100px;
 }
 
 #assessment-questions {
@@ -113,4 +125,15 @@ footer {
 .radio-group input[type="radio"] {
     width: auto;
     margin: 0;
+}
+
+textarea {
+    width: 100%; 
+    height: 100px; /* Adjust height as needed */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    resize: vertical; /* Allow vertical resizing */
 }
