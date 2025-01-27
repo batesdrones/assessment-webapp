@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economic Feasibility Assessment</title>
+    <title>SNG Broadband Economic Feasibility Assessment</title>
     <link rel="stylesheet" href="styles.css"> 
     <script src="scripts.js" defer></script>
 </head>
@@ -33,8 +33,8 @@
                         <option value="">--Select Project--</option> 
                     </select>
 
-                    <label for="organization-name">Name of Organization:</label>
-                    <select id="organization-name" name="organization-name">
+                    <label for="facility-name">Name of Facility:</label>
+                    <select id="facility-name" name="facility-name">
                         <option value="">--Select Existing--</option> 
                     </select>
                     <input type="text" id="new-organization" name="new-organization" placeholder="Or create new" style="display: block; margin-top: 10px;">
@@ -72,8 +72,14 @@
                     <label for="contract-expiration">Current Contract Expiration Date:</label>
                     <input type="date" id="contract-expiration" name="contract-expiration">
 
-                    <label for="subscribed-speed">Subscribed Internet Speed (Upload/Download):</label>
-                    <input type="text" id="subscribed-speed" name="subscribed-speed" placeholder="e.g., 100/20 Mbps">
+                    <label for="subscribed_speed">Subscribed Speed (Mbps) / What are internet speeds are you paying for?</label>
+                    <div class="speed-inputs"> 
+                        <input type="number" id="subscribed_download" name="subscribed_download" min="0" required style="width: 45%;"> 
+                        <label for="subscribed_download" style="display: inline-block; width: 20%;">Download</label>                         
+                        <input type="number" id="subscribed_upload" name="subscribed_upload" min="0" required style="width: 45%; margin-right: 10px;"> 
+                        <label for="subscribed_upload" style="display: inline-block; width: 20%;">Upload</label> 
+
+                    </div>
 
                     <label for="monthly_internet_cost">Monthly Internet Cost:</label>
                     <input type="number" id="monthly_internet_cost" name="monthly_internet_cost" step="0.01" min="0" required>

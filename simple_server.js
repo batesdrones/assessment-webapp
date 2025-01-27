@@ -12,9 +12,9 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL 
 });
 
-app.get('/api/organizations', async (req, res) => {
+app.get('/api/facilities', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM Organizations'); 
+    const result = await pool.query('SELECT * FROM Facilities'); 
     res.json(result.rows); 
   } catch (error) {
     console.error('Error fetching organizations:', error);

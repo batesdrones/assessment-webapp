@@ -1,94 +1,93 @@
-// Fetch organizations from the server
-fetch('/api/organizations')
-  .then(response => response.json())
-  .then(data => {
-    const organizationSelect = document.getElementById('organization-name');
-    data.forEach(org => {
-      const option = document.createElement('option');
-      option.value = org.organization_name;
-      option.text = org.organization_name;
-      organizationSelect.appendChild(option);
-    });
-  })
-  .catch(error => {
-    console.error('Error fetching organizations:', error);
-  });
-
-// Fetch distinct facility types from the server
-fetch('/api/facility-types')
-  .then(response => response.json())
-  .then(data => {
-    const facilityTypeSelect = document.getElementById('facility-type');
-    data.forEach(type => {
-      const option = document.createElement('option');
-      option.value = type.facility_type;
-      option.text = type.facility_type;
-      facilityTypeSelect.appendChild(option);
-    });
-  })
-  .catch(error => {
-    console.error('Error fetching facility types:', error);
-  });
-
-// Fetch distinct projects from the server
 fetch('/api/projects')
   .then(response => response.json())
   .then(data => {
     const projectSelect = document.getElementById('project');
     data.forEach(project => {
       const option = document.createElement('option');
-      option.value = project.project;
+      option.value = project.project; 
       option.text = project.project;
       projectSelect.appendChild(option);
+    });
+
+    // Add event listener to the project select
+    projectSelect.addEventListener('change', () => {
+      const selectedProject = projectSelect.value;
+
+      // Fetch facilities for the selected project
+      fetch(`/api/facilities?project=${selectedProject}`) 
+        .then(response => response.json())
+        .then(data => {
+          const facilityNameSelect = document.getElementById('facility-name');
+          facilityNameSelect.innerHTML = ''; // Clear existing options
+          data.forEach(facility => {
+            const option = document.createElement('option');
+            option.value = facility.id; // Use facility ID as the option value
+            option.text = facility.facility_name;
+            facilityNameSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching facilities:', error);
+        });
     });
   })
   .catch(error => {
     console.error('Error fetching projects:', error);
   });
 
-// Handle form submission and validation
-const assessmentForm = document.getElementById('assessment-form');
+// Add event listener to the facility-name select
+const facilityNameSelect = document.getElementById('facility-name');
+facilityNameSelect.addEventListener('change', () => {
+  const selectedFacilityId = facilityNameSelect.value;
 
+  // Fetch facility details for the selected facility
+  fetch(`/api/facilities/${selectedFacilityId}`)
+    .then(response => response.json())
+    .then(data => {
+      // Populate form fields with facility details
+      document.getElementById('street-address').value = data.address || ''; 
+      // ... populate other fields (status, internet_type, etc.) 
+    })
+    .catch(error => {
+      console.error('Error fetching facility details:', error);
+    });
+});
+
+// Handle form submission
+const assessmentForm = document.getElementById('assessment-form');
 assessmentForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-
-  // Basic input validation (add more as needed)
-  const organizationName = document.getElementById('organization-name').value;
-  const project = document.getElementById('project').value;
-  const facilityType = document.getElementById('facility-type').value;
-  if (!organizationName) {
-    alert('Organization Name is required.');
-    return;
-  }
-  if (!project) {
-    alert('Project is required.');
-    return;
-  }
-  if (!facilityType) {
-    alert('Facility Type is required.');
-    return;
-  }
-  // ... add more input validation checks for other fields
 
   const formData = new FormData(assessmentForm);
 
   try {
     const response = await fetch('/api/assessments', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        facility_id: formData.get('facility-name'),
+        question1_speed: formData.get('question1_speed'),
+        question2_reliability: formData.get('question2_reliability'),
+        question3_support: formData.get('question3_support'),
+        question4_cost: formData.get('question4_cost'),
+        question5_sufficient: formData.get('question5_sufficient'),
+        question6_future_needs: formData.get('question6_future_needs'),
+        question7_limitations: formData.get('question7_limitations'),
+        question8_improvements: formData.get('question8_improvements')
+      })
     });
 
     if (response.ok) {
-      const data = await response.json();
-      console.log('Assessment submitted successfully:', data);
-      // Optionally, display a success message to the user
+      // Handle successful submission (e.g., display success message, redirect)
+      console.log('Assessment submitted successfully!');
+      // Optionally, redirect to a success page
+      window.location.href = '/success'; 
     } else {
-      const errorData = await response.json();
-      console.error('Error submitting assessment:', errorData);
-      // Optionally, display an error message to the user
+      console.error('Error submitting assessment:', await response.text());
     }
   } catch (error) {
     console.error('Error submitting assessment:', error);
-    // Optionally, display an error message to the user
   }
 });
